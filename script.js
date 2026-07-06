@@ -13,58 +13,127 @@ function togglePassword() {
 }
 
 // Form Submission Handler
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const loginBtn = e.target.querySelector('.login-btn');
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    // Add loading state
-    loginBtn.classList.add('loading');
-    loginBtn.disabled = true;
-    loginBtn.textContent = 'Logging in...';
-    
-    try {
-        // Simulate API call - Replace with actual API endpoint
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Validation
-        if (!email || !password) {
-            throw new Error('Email and password are required');
-        }
-        
-        if (!isValidEmail(email)) {
-            throw new Error('Please enter a valid email');
-        }
-        
-        if (password.length < 6) {
-            throw new Error('Password must be at least 6 characters');
-        }
-        
-        // Success
-        loginBtn.classList.remove('loading');
-        loginBtn.classList.add('success');
-        loginBtn.textContent = '✓ Login Successful';
-        
-        // Log success (replace with actual login logic)
-        console.log('Login successful:', { email });
-        
-        // Redirect after delay (optional)
-        setTimeout(() => {
-            // window.location.href = '/dashboard';
-            console.log('Redirecting to dashboard...');
-        }, 1500);
-        
-    } catch (error) {
-        // Error handling
-        loginBtn.classList.remove('loading');
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Login';
-        
-        showError(error.message);
-        console.error('Login error:', error);
+// Wrap DOM interactions to avoid errors when the script runs before elements exist
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const loginBtn = e.target.querySelector('.login-btn');
+            const emailEl = document.getElementById('email');
+            const passwordEl = document.getElementById('password');
+            const email = emailEl ? emailEl.value : '';
+            const password = passwordEl ? passwordEl.value : '';
+
+            // Add loading state (guarded)
+            if (loginBtn) {
+                loginBtn.classList.add('loading');
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Logging in...';
+            }
+
+            try {
+                // Simulate API call - Replace with actual API endpoint
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Validation
+                if (!email || !password) {
+                    throw new Error('Email and password are required');
+                }
+
+                if (!isValidEmail(email)) {
+                    throw new Error('Please enter a valid email');
+                }
+
+                if (password.length < 6) {
+                    throw new Error('Password must be at least 6 characters');
+                }
+
+                // Success
+                if (loginBtn) {
+                    loginBtn.classList.remove('loading');
+                    loginBtn.classList.add('success');
+                    loginBtn.textContent = '✓ Login Successful';
+                }
+
+                // Log success (replace with actual login logic)
+                console.log('Login successful:', { email });
+
+                // Redirect after delay (optional)
+                setTimeout(() => {
+                    // window.location.href = '/dashboard';
+                    console.log('Redirecting to dashboard...');
+                }, 1500);
+
+            } catch (error) {
+                // Error handling
+                if (loginBtn) {
+                    loginBtn.classList.remove('loading');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login';
+                }
+
+                showError((error && error.message) ? error.message : 'An unexpected error occurred');
+                console.error('Login error:', error);
+            }
+        });
     }
+
+    // Input animations on focus
+    const inputs = document.querySelectorAll('.form-group input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            const group = this.closest('.form-group');
+            if (group && group.parentElement) {
+                group.parentElement.style.animation = 'none';
+            }
+        });
+    });
+
+    // Social button handlers
+    const socialBtns = document.querySelectorAll('.social-btn');
+    socialBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const provider = btn.classList.contains('google') ? 'Google' : (btn.classList.contains('github') ? 'GitHub' : 'Provider');
+            console.log(`Logging in with ${provider}...`);
+        });
+    });
+
+    // Add keyframe animations via style tag
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Smooth scroll behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+
+    // Console greeting
+    console.log('%c🌟 Welcome to Premium Login Screen 🌟', 'color: #6366f1; font-size: 20px; font-weight: bold;');
+    console.log('%cDesigned with ❤️ for amazing experiences', 'color: #ec4899; font-size: 14px;');
 });
 
 // Email Validation
@@ -105,55 +174,3 @@ function showError(message) {
         setTimeout(() => errorDiv.remove(), 300);
     }, 4000);
 }
-
-// Input animations on focus
-const inputs = document.querySelectorAll('.form-group input');
-inputs.forEach(input => {
-    input.addEventListener('focus', function() {
-        this.parentElement.parentElement.style.animation = 'none';
-    });
-});
-
-// Social button handlers
-document.querySelectorAll('.social-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const provider = btn.classList.contains('google') ? 'Google' : 'GitHub';
-        console.log(`Logging in with ${provider}...`);
-        // showError(`${provider} login will be implemented soon`);
-    });
-});
-
-// Add keyframe animations via style tag
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
-
-// Smooth scroll behavior
-document.documentElement.style.scrollBehavior = 'smooth';
-
-// Console greeting
-console.log('%c🌟 Welcome to Premium Login Screen 🌟', 'color: #6366f1; font-size: 20px; font-weight: bold;');
-console.log('%cDesigned with ❤️ for amazing experiences', 'color: #ec4899; font-size: 14px;');
